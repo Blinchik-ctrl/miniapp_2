@@ -1,0 +1,364 @@
+import React, { useState, useEffect } from 'react';
+import { Users, Calendar, MapPin, Heart, MessageCircle, Search, Plus, TrendingUp } from 'lucide-react';
+
+export default function InterestsApp() {
+  const [currentView, setCurrentView] = useState('feed');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [userProfile, setUserProfile] = useState({
+    name: 'Александр',
+    avatar: '👨‍💼',
+    interests: ['Кофе', 'IT', 'Путешествия']
+  });
+
+  const [events, setEvents] = useState([
+    {
+      id: 1,
+      title: 'Кофе и нетворкинг',
+      category: 'coffee',
+      creator: 'Мария',
+      creatorAvatar: '👩',
+      participants: 4,
+      maxParticipants: 8,
+      date: '20 октября',
+      time: '18:00',
+      location: 'Кофейня "Beans"',
+      description: 'Встретимся, пообщаемся за чашечкой кофе',
+      likes: 12,
+      isLiked: false
+    },
+    {
+      id: 2,
+      title: 'Хайкинг в горы',
+      category: 'sport',
+      creator: 'Дмитрий',
+      creatorAvatar: '🧔',
+      participants: 6,
+      maxParticipants: 10,
+      date: '22 октября',
+      time: '08:00',
+      location: 'Ала-Арча',
+      description: 'Поход на целый день, берем еду с собой',
+      likes: 24,
+      isLiked: true
+    },
+    {
+      id: 3,
+      title: 'Настольные игры',
+      category: 'games',
+      creator: 'Анна',
+      creatorAvatar: '👩‍🦰',
+      participants: 3,
+      maxParticipants: 6,
+      date: '19 октября',
+      time: '19:00',
+      location: 'Anticafe "Time"',
+      description: 'Играем в Каркассон и Монополию',
+      likes: 8,
+      isLiked: false
+    },
+    {
+      id: 4,
+      title: 'IT-meetup',
+      category: 'tech',
+      creator: 'Сергей',
+      creatorAvatar: '👨‍💻',
+      participants: 12,
+      maxParticipants: 20,
+      date: '21 октября',
+      time: '17:00',
+      location: 'CoWorking Space',
+      description: 'Обсуждаем новые технологии и делимся опытом',
+      likes: 31,
+      isLiked: true
+    }
+  ]);
+
+  const categories = [
+    { id: 'all', name: 'Все', icon: '🌟', color: 'bg-purple-500' },
+    { id: 'coffee', name: 'Кофе', icon: '☕', color: 'bg-amber-600' },
+    { id: 'sport', name: 'Спорт', icon: '⚽', color: 'bg-green-500' },
+    { id: 'games', name: 'Игры', icon: '🎮', color: 'bg-blue-500' },
+    { id: 'tech', name: 'IT', icon: '💻', color: 'bg-indigo-500' },
+    { id: 'art', name: 'Искусство', icon: '🎨', color: 'bg-pink-500' }
+  ];
+
+  const filteredEvents = selectedCategory === 'all'
+    ? events
+    : events.filter(e => e.category === selectedCategory);
+
+  const handleLike = (eventId) => {
+    setEvents(events.map(event =>
+      event.id === eventId
+        ? { ...event, likes: event.isLiked ? event.likes - 1 : event.likes + 1, isLiked: !event.isLiked }
+        : event
+    ));
+  };
+
+  const handleJoinEvent = (eventId) => {
+    setEvents(events.map(event =>
+      event.id === eventId && event.participants < event.maxParticipants
+        ? { ...event, participants: event.participants + 1 }
+        : event
+    ));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-3xl">{userProfile.avatar}</div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">Привет, {userProfile.name}!</h1>
+                <p className="text-sm text-gray-500">Найди компанию по интересам</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentView('create')}
+              className="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="bg-white border-b sticky top-[72px] z-10">
+        <div className="max-w-4xl mx-auto px-4 py-3 overflow-x-auto">
+          <div className="flex gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+                  selectedCategory === cat.id
+                    ? `${cat.color} text-white shadow-md`
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className="text-lg">{cat.icon}</span>
+                <span className="font-medium">{cat.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        {currentView === 'feed' && (
+          <div className="space-y-4">
+            {/* Trending Section */}
+            <div className="bg-gradient-to-r from-orange-400 to-pink-500 rounded-2xl p-4 text-white shadow-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-5 h-5" />
+                <h2 className="font-bold text-lg">Популярное сегодня</h2>
+              </div>
+              <p className="text-sm opacity-90">12 новых событий · 48 человек ищут компанию</p>
+            </div>
+
+            {/* Events List */}
+            {filteredEvents.map(event => (
+              <div key={event.id} className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden">
+                <div className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl">{event.creatorAvatar}</div>
+                      <div>
+                        <h3 className="font-bold text-gray-800">{event.creator}</h3>
+                        <p className="text-sm text-gray-500">организатор</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleLike(event.id)}
+                      className={`p-2 rounded-full transition-all ${
+                        event.isLiked ? 'bg-red-50' : 'bg-gray-50 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Heart className={`w-5 h-5 ${event.isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                    </button>
+                  </div>
+
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h2>
+                  <p className="text-gray-600 mb-4">{event.description}</p>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Calendar className="w-4 h-4 text-purple-500" />
+                      <span className="text-sm">{event.date} в {event.time}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <MapPin className="w-4 h-4 text-red-500" />
+                      <span className="text-sm">{event.location}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Users className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm">{event.participants} / {event.maxParticipants} участников</span>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-4">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all"
+                        style={{ width: `${(event.participants / event.maxParticipants) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleJoinEvent(event.id)}
+                      disabled={event.participants >= event.maxParticipants}
+                      className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
+                        event.participants >= event.maxParticipants
+                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg'
+                      }`}
+                    >
+                      {event.participants >= event.maxParticipants ? 'Мест нет' : 'Присоединиться'}
+                    </button>
+                    <button className="px-4 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+                      <MessageCircle className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-3 pt-3 border-t text-sm text-gray-500">
+                    <span>{event.likes} нравится</span>
+                    <span>·</span>
+                    <span>24 просмотра</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {currentView === 'create' && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Создать событие</h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Название</label>
+                <input
+                  type="text"
+                  placeholder="Например: Кофе и общение"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Категория</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {categories.filter(c => c.id !== 'all').map(cat => (
+                    <button
+                      key={cat.id}
+                      className="flex flex-col items-center gap-1 p-3 border-2 border-gray-200 rounded-xl hover:border-purple-500 transition-all"
+                    >
+                      <span className="text-2xl">{cat.icon}</span>
+                      <span className="text-xs font-medium">{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Описание</label>
+                <textarea
+                  rows="3"
+                  placeholder="Расскажите о событии..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Дата</label>
+                  <input
+                    type="date"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Время</label>
+                  <input
+                    type="time"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Место встречи</label>
+                <input
+                  type="text"
+                  placeholder="Адрес или название места"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Максимум участников</label>
+                <input
+                  type="number"
+                  placeholder="10"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setCurrentView('feed')}
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={() => setCurrentView('feed')}
+                  className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                >
+                  Создать
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex justify-around">
+            <button
+              onClick={() => setCurrentView('feed')}
+              className={`flex flex-col items-center gap-1 ${currentView === 'feed' ? 'text-purple-500' : 'text-gray-400'}`}
+            >
+              <Users className="w-6 h-6" />
+              <span className="text-xs font-medium">События</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-gray-400">
+              <Search className="w-6 h-6" />
+              <span className="text-xs font-medium">Поиск</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-gray-400">
+              <MessageCircle className="w-6 h-6" />
+              <span className="text-xs font-medium">Чаты</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-gray-400">
+              <Heart className="w-6 h-6" />
+              <span className="text-xs font-medium">Профиль</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Spacing for bottom nav */}
+      <div className="h-20" />
+    </div>
+  );
+}
